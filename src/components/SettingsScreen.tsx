@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { AppSettings } from '../types';
+import { ColorTheme } from '../hooks/useTheme';
 import {
   Settings,
   Download,
@@ -10,6 +11,11 @@ import {
   Check,
   AlertOctagon,
   ShieldCheck,
+  Sun,
+  Moon,
+  Sparkles,
+  Palette,
+  Layers,
 } from 'lucide-react';
 
 interface SettingsScreenProps {
@@ -19,6 +25,12 @@ interface SettingsScreenProps {
   onClearDatabase: () => void;
   onExportJSON: () => void;
   onImportJSON: (jsonStr: string) => boolean;
+  theme?: 'dark' | 'light';
+  toggleTheme?: () => void;
+  colorTheme?: ColorTheme;
+  setColorTheme?: (color: ColorTheme) => void;
+  isGlass?: boolean;
+  toggleGlass?: () => void;
 }
 
 const CURRENCY_OPTIONS = [
@@ -39,6 +51,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   onClearDatabase,
   onExportJSON,
   onImportJSON,
+  theme,
+  toggleTheme,
+  colorTheme = 'emerald',
+  setColorTheme,
+  isGlass = true,
+  toggleGlass,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
@@ -90,7 +108,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                 onClick={() =>
                   onUpdateSettings({ currencySymbol: cur.symbol, currencyCode: cur.code })
                 }
-                className={`p-3 rounded-xl border text-left transition-all ${
+                className={`p-3 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected
                     ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold'
                     : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
@@ -101,6 +119,120 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               </button>
             );
           })}
+        </div>
+      </div>
+
+      {/* 2. Appearance & Visual Themes */}
+      <div id="settings-theme-card" className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-5">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+            <Palette className="w-4 h-4 text-emerald-400" />
+            <span>Appearance & Glass Theme</span>
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Base Mode & Glass Toggle */}
+          <div className="space-y-3">
+            <label className="text-xs font-semibold text-slate-300 block">Base Lighting & Surface</label>
+            <div className="grid grid-cols-2 gap-2">
+              {toggleTheme && (
+                <>
+                  <button
+                    onClick={() => theme !== 'dark' && toggleTheme()}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer ${
+                      theme === 'dark'
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold'
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <Moon className="w-4 h-4 text-indigo-400 shrink-0" />
+                    <div>
+                      <span className="text-xs font-bold block">Dark Slate</span>
+                      <span className="text-[10px] text-slate-400">Eye-safe canvas</span>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => theme !== 'light' && toggleTheme()}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer ${
+                      theme === 'light'
+                        ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400 font-bold'
+                        : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                    }`}
+                  >
+                    <Sun className="w-4 h-4 text-amber-400 shrink-0" />
+                    <div>
+                      <span className="text-xs font-bold block">Light Theme</span>
+                      <span className="text-[10px] text-slate-400">Crisp high-contrast</span>
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Glassmorphism Toggle Button */}
+            {toggleGlass && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={toggleGlass}
+                  className={`w-full p-3 rounded-xl border transition-all flex items-center justify-between cursor-pointer ${
+                    isGlass
+                      ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300'
+                      : 'bg-slate-950/60 border-slate-800 text-slate-400'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 text-left">
+                    <Sparkles className={`w-4 h-4 ${isGlass ? 'text-indigo-400' : 'text-slate-500'}`} />
+                    <div>
+                      <span className="text-xs font-bold block text-slate-200">iOS Liquid Glass Effect</span>
+                      <span className="text-[10px] text-slate-400">Translucent SF-style cards, background blur & glossy glow</span>
+                    </div>
+                  </div>
+                  <div className={`w-9 h-5 rounded-full p-0.5 transition-colors relative ${isGlass ? 'bg-indigo-500' : 'bg-slate-700'}`}>
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${isGlass ? 'translate-x-4' : 'translate-x-0'}`} />
+                  </div>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Color Accent Themes */}
+          {setColorTheme && (
+            <div className="space-y-3">
+              <label className="text-xs font-semibold text-slate-300 block">Primary Accent Theme</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {[
+                  { id: 'emerald', label: 'Emerald Cash', color: '#10b981', border: 'border-emerald-500' },
+                  { id: 'indigo', label: 'Ocean Indigo', color: '#6366f1', border: 'border-indigo-500' },
+                  { id: 'purple', label: 'Royal Purple', color: '#a855f7', border: 'border-purple-500' },
+                  { id: 'amber', label: 'Sunset Amber', color: '#f59e0b', border: 'border-amber-500' },
+                  { id: 'rose', label: 'Crimson Rose', color: '#f43f5e', border: 'border-rose-500' },
+                ].map((palette) => {
+                  const isSelected = colorTheme === palette.id;
+                  return (
+                    <button
+                      key={palette.id}
+                      type="button"
+                      onClick={() => setColorTheme(palette.id as ColorTheme)}
+                      className={`p-2.5 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer ${
+                        isSelected
+                          ? 'bg-slate-800 border-emerald-500 font-bold text-white shadow-md'
+                          : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 text-slate-300'
+                      }`}
+                    >
+                      <span
+                        className="w-4 h-4 rounded-full shrink-0 border border-white/20 shadow-xs"
+                        style={{ backgroundColor: palette.color }}
+                      />
+                      <span className="text-xs">{palette.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

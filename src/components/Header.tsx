@@ -11,6 +11,8 @@ import {
   WifiOff,
   ChevronDown,
   BookOpen,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -21,6 +23,8 @@ interface HeaderProps {
   setCurrentMonthId: (id: string) => void;
   onOpenQuickAdd: (type: 'income' | 'expense' | 'debt') => void;
   onCreateNextMonth: () => void;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,6 +35,8 @@ export const Header: React.FC<HeaderProps> = ({
   setCurrentMonthId,
   onOpenQuickAdd,
   onCreateNextMonth,
+  theme,
+  toggleTheme,
 }) => {
   return (
     <header id="app-header" className="bg-slate-900 border-b border-slate-800 text-slate-100 sticky top-0 z-30 shadow-md">
@@ -82,8 +88,8 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             )}
 
-            {/* Add Transaction drop button */}
-            <div className="flex items-center gap-1">
+            {/* Add Transaction drop button & Theme Toggle */}
+            <div className="flex items-center gap-1.5">
               <button
                 id="header-add-expense-btn"
                 onClick={() => onOpenQuickAdd('expense')}
@@ -101,6 +107,19 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Income</span>
+              </button>
+
+              <button
+                id="theme-toggle-btn"
+                onClick={toggleTheme}
+                className="p-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors cursor-pointer flex items-center justify-center shrink-0"
+                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-4 h-4 text-amber-400" />
+                ) : (
+                  <Moon className="w-4 h-4 text-indigo-400" />
+                )}
               </button>
             </div>
           </div>

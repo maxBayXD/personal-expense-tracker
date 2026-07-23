@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <rect width="512" height="512" rx="128" fill="#0f172a"/>
+  <rect x="32" y="32" width="448" height="448" rx="96" fill="#1e293b" stroke="#334155" stroke-width="12"/>
+  <circle cx="380" cy="130" r="40" fill="#10b981" opacity="0.2"/>
+  
+  <!-- Wallet Body -->
+  <path d="M110 160 C110 140 126 124 146 124 L366 124 C386 124 402 140 402 160 L402 352 C402 372 386 388 366 388 L146 388 C126 388 110 372 110 352 Z" fill="#0f172a" stroke="#10b981" stroke-width="16" stroke-linejoin="round"/>
+  
+  <!-- Wallet Flap / Card Accent -->
+  <path d="M310 210 L402 210 C418 210 430 222 430 238 L430 274 C430 290 418 302 402 302 L310 302 C294 302 282 290 282 274 L282 238 C282 222 294 210 310 210 Z" fill="#10b981"/>
+  
+  <!-- Lock / Emblem Circle -->
+  <circle cx="330" cy="256" r="16" fill="#0f172a"/>
+  
+  <!-- Trend Arrow / Sparkle -->
+  <path d="M160 300 L210 240 L250 270 L320 180" fill="none" stroke="#34d399" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="290,180 320,180 320,210" fill="none" stroke="#34d399" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

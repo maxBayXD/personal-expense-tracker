@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useDatabase } from './hooks/useDatabase';
+import { useTheme } from './hooks/useTheme';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { MonthsList } from './components/MonthsList';
@@ -33,6 +34,8 @@ export default function App() {
     exportJSON,
     importJSON,
   } = useDatabase();
+
+  const { theme, toggleTheme, colorTheme, setColorTheme, isGlass, toggleGlass } = useTheme();
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'months' | 'debts' | 'guide' | 'settings'>('dashboard');
   const [modalOpen, setModalOpen] = useState(false);
@@ -85,6 +88,8 @@ export default function App() {
         setCurrentMonthId={setCurrentMonthId}
         onOpenQuickAdd={handleOpenQuickAdd}
         onCreateNextMonth={handleOpenCreateMonth}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* Main Body Content Container */}
@@ -143,6 +148,12 @@ export default function App() {
             onClearDatabase={clearDatabase}
             onExportJSON={exportJSON}
             onImportJSON={importJSON}
+            theme={theme}
+            toggleTheme={toggleTheme}
+            colorTheme={colorTheme}
+            setColorTheme={setColorTheme}
+            isGlass={isGlass}
+            toggleGlass={toggleGlass}
           />
         )}
       </main>
