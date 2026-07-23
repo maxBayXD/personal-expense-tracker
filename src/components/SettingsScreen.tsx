@@ -516,13 +516,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </div>
 
             {/* Explicit Security Warning Box */}
-            <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 space-y-1.5">
-              <div className="flex items-center gap-1.5 font-semibold text-amber-400">
+            <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-xs space-y-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-amber-800 dark:text-amber-400">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
                 <span>Important PIN Security Warning</span>
               </div>
-              <p className="text-[11px] text-amber-200/90 leading-relaxed">
-                Please remember your 4-digit PIN code and set a recovery question below! If you lose your PIN, you will need your Security Answer to recover access, or perform an Emergency PIN Reset. Export CSV or JSON data backups periodically to keep your financial records secure.
+              <p className="text-[11px] text-amber-900/90 dark:text-amber-200/90 leading-relaxed font-medium">
+                Please remember your 4-digit PIN code and set a recovery question below! If you lose your PIN, you will need your Security Answer to recover access. Export CSV or JSON data backups periodically to keep your financial records secure.
               </p>
             </div>
 

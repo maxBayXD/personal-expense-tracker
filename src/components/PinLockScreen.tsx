@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, KeyRound, AlertTriangle, HelpCircle, ShieldAlert, CheckCircle2, ArrowRight, RefreshCw, X } from 'lucide-react';
+import { Lock, KeyRound, AlertTriangle, HelpCircle, CheckCircle2, ArrowRight, X } from 'lucide-react';
 
 interface PinLockScreenProps {
   securityQuestion: string;
   onUnlock: (pin: string) => boolean;
   onResetWithAnswer: (answer: string, newPin: string) => boolean;
-  onEmergencyReset: () => void;
 }
 
 export const PinLockScreen: React.FC<PinLockScreenProps> = ({
   securityQuestion,
   onUnlock,
   onResetWithAnswer,
-  onEmergencyReset,
 }) => {
   const [pin, setPin] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
@@ -25,9 +23,6 @@ export const PinLockScreen: React.FC<PinLockScreenProps> = ({
   const [confirmNewPinInput, setConfirmNewPinInput] = useState<string>('');
   const [recoveryError, setRecoveryError] = useState<string>('');
   const [recoverySuccess, setRecoverySuccess] = useState<boolean>(false);
-
-  // Emergency reset modal state
-  const [showEmergencyModal, setShowEmergencyModal] = useState<boolean>(false);
 
   // Handle number click
   const handleNumClick = (digit: string) => {
@@ -62,7 +57,7 @@ export const PinLockScreen: React.FC<PinLockScreenProps> = ({
   // Handle physical keyboard input
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (showForgotModal || showEmergencyModal) return;
+      if (showForgotModal) return;
       if (e.key >= '0' && e.key <= '9') {
         handleNumClick(e.key);
       } else if (e.key === 'Backspace') {
@@ -71,7 +66,7 @@ export const PinLockScreen: React.FC<PinLockScreenProps> = ({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [pin, showForgotModal, showEmergencyModal]);
+  }, [pin, showForgotModal]);
 
   // Handle recovery form submission
   const handleRecoverySubmit = (e: React.FormEvent) => {
@@ -188,23 +183,14 @@ export const PinLockScreen: React.FC<PinLockScreenProps> = ({
         </div>
 
         {/* Recovery / Forgot PIN links */}
-        <div className="pt-2 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800/80">
+        <div className="pt-2 flex items-center justify-center text-xs text-slate-400 border-t border-slate-800/80">
           <button
             type="button"
             onClick={() => setShowForgotModal(true)}
             className="hover:text-emerald-400 underline underline-offset-4 flex items-center gap-1 transition-colors cursor-pointer"
           >
             <HelpCircle className="w-3.5 h-3.5 text-slate-400" />
-            <span>Forgot PIN?</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowEmergencyModal(true)}
-            className="hover:text-rose-400 underline underline-offset-4 flex items-center gap-1 transition-colors cursor-pointer text-[11px]"
-          >
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-400/80" />
-            <span>Emergency Reset</span>
+            <span>Forgot PIN? Answer Security Question</span>
           </button>
         </div>
       </div>
@@ -234,10 +220,10 @@ export const PinLockScreen: React.FC<PinLockScreenProps> = ({
             <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 space-y-1">
               <div className="flex items-center gap-1.5 font-semibold text-amber-400">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Important Warning</span>
+                <span>Security Notice</span>
               </div>
               <p className="text-[11px] text-amber-200/90 leading-relaxed">
-                If you lose both your PIN and your recovery answer, use the Emergency Reset option to unblock your app session.
+                Please enter the answer to your security question below. If you cannot provide the correct answer, your PIN cannot be reset without access to your saved security settings.
               </p>
             </div>
 
@@ -319,56 +305,6 @@ export const PinLockScreen: React.FC<PinLockScreenProps> = ({
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Emergency Reset Confirmation Modal */}
-      {showEmergencyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-fade-in">
-          <div className="w-full max-w-md bg-slate-900 border border-rose-500/30 rounded-3xl p-6 shadow-2xl space-y-5 text-left relative">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400">
-                <ShieldAlert className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-white">Emergency PIN Security Reset</h3>
-                <p className="text-xs text-rose-300">Remove PIN lock security to regain app access</p>
-              </div>
-            </div>
-
-            <div className="p-3.5 bg-rose-500/10 border border-rose-500/20 rounded-xl text-xs text-rose-200 space-y-2">
-              <p className="font-semibold text-rose-400 flex items-center gap-1.5">
-                <AlertTriangle className="w-4 h-4" />
-                <span>What does Emergency Reset do?</span>
-              </p>
-              <ul className="list-disc list-inside space-y-1 text-[11px] text-rose-200/90 leading-relaxed">
-                <li>Removes the 4-digit PIN lock security setting.</li>
-                <li>Allows immediate access to your Expense Tracker dashboard.</li>
-                <li>Your financial transaction history and debts remain intact.</li>
-              </ul>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setShowEmergencyModal(false)}
-                className="w-1/2 p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs rounded-xl cursor-pointer"
-              >
-                Keep Locked
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onEmergencyReset();
-                  setShowEmergencyModal(false);
-                }}
-                className="w-1/2 p-3 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/20"
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span>Reset PIN Lock</span>
-              </button>
-            </div>
           </div>
         </div>
       )}

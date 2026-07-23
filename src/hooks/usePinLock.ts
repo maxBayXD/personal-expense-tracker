@@ -104,19 +104,6 @@ export function usePinLock() {
     return false;
   }, [securityAnswer]);
 
-  // Emergency PIN reset (clears PIN lock settings if user forgot both PIN and recovery answer)
-  const emergencyResetPin = useCallback(() => {
-    setPinEnabled(false);
-    setPinCode('');
-    setSecurityQuestion('');
-    setSecurityAnswer('');
-    setIsLocked(false);
-    localStorage.removeItem(STORAGE_KEY_PIN_ENABLED);
-    localStorage.removeItem(STORAGE_KEY_PIN_CODE);
-    localStorage.removeItem(STORAGE_KEY_PIN_QUESTION);
-    localStorage.removeItem(STORAGE_KEY_PIN_ANSWER);
-  }, []);
-
   return {
     pinEnabled,
     pinCode,
@@ -129,6 +116,5 @@ export function usePinLock() {
     disablePin,
     changePin,
     resetPinWithAnswer,
-    emergencyResetPin,
   };
 }

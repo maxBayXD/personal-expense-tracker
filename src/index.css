@@ -102,7 +102,7 @@ html.glass-ui.dark header#app-header {
 
 /* iOS Glassmorphism Light Mode Surface */
 html.glass-ui.light .bg-slate-900 {
-  background: rgba(255, 255, 255, 0.82) !important;
+  background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(28px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
   border-color: rgba(255, 255, 255, 0.90) !important;
@@ -110,31 +110,11 @@ html.glass-ui.light .bg-slate-900 {
 }
 
 html.glass-ui.light header#app-header {
-  background: rgba(255, 255, 255, 0.85) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
   backdrop-filter: blur(28px) saturate(190%) !important;
   -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
   border-bottom-color: rgba(0, 0, 0, 0.08) !important;
   box-shadow: inset 0 -1px 0 0 rgba(0, 0, 0, 0.04) !important;
-}
-
-html.glass-ui .bg-slate-800,
-html.glass-ui .bg-slate-800\/40,
-html.glass-ui .bg-slate-800\/30,
-html.glass-ui .bg-slate-800\/50 {
-  background: rgba(30, 41, 59, 0.40) !important;
-  backdrop-filter: blur(12px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-}
-
-html.glass-ui.light .bg-slate-800,
-html.glass-ui.light .bg-slate-800\/80,
-html.glass-ui.light .bg-slate-800\/60,
-html.glass-ui.light .bg-slate-800\/50,
-html.glass-ui.light .bg-slate-800\/40,
-html.glass-ui.light .bg-slate-800\/30 {
-  background: rgba(241, 245, 249, 0.80) !important;
-  border-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 /* ==========================================================================
@@ -149,9 +129,27 @@ html.light body {
   color: #0f172a;
 }
 
+/* Gradient overrides for Light Mode */
+html.light .from-slate-900,
+html.light .via-slate-900,
+html.light .to-slate-950,
+html.light .from-slate-950,
+html.light .to-slate-900 {
+  --tw-gradient-from: #ffffff !important;
+  --tw-gradient-to: #f8fafc !important;
+  --tw-gradient-stops: #ffffff, #f8fafc !important;
+  background-color: #ffffff !important;
+}
+
+html.light #dashboard-cashflow-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%) !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01) !important;
+}
+
 /* Background surface overrides for Light Mode */
 html.light .bg-slate-950 {
-  background-color: #f8fafc !important;
+  background-color: #f8fafc;
 }
 
 html.light .bg-slate-900 {
@@ -171,13 +169,38 @@ html.light .bg-slate-800\/30 {
 }
 
 html.light .bg-slate-950\/60,
+html.light .bg-slate-950\/70,
 html.light .bg-slate-950\/80 {
-  background-color: rgba(248, 250, 252, 0.92) !important;
+  background-color: rgba(241, 245, 249, 0.95);
+  border-color: #cbd5e1;
 }
 
 html.light .bg-slate-900\/80,
 html.light .bg-slate-900\/50 {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Tinted stats and alert boxes in Light Mode */
+html.light .bg-emerald-950\/20,
+html.light .bg-emerald-950\/30,
+html.light .bg-emerald-500\/10 {
+  background-color: #ecfdf5 !important;
+  border-color: #a7f3d0 !important;
+}
+
+html.light .bg-rose-950\/20,
+html.light .bg-rose-950\/30,
+html.light .bg-rose-500\/10 {
+  background-color: #fff1f2 !important;
+  border-color: #fecdd3 !important;
+}
+
+html.light .bg-amber-950\/20,
+html.light .bg-amber-950\/30,
+html.light .bg-amber-500\/10,
+html.light .bg-amber-500\/20 {
+  background-color: #fef3c7 !important;
+  border-color: #fde68a !important;
 }
 
 /* Border overrides */
@@ -185,138 +208,155 @@ html.light .border-slate-800,
 html.light .border-slate-800\/80,
 html.light .border-slate-800\/50,
 html.light .border-slate-700 {
-  border-color: #e2e8f0 !important;
+  border-color: #e2e8f0;
 }
 
-/* Base Text Color Overrides for Light Mode (Fixes White-on-White / Pale Text) */
-html.light .text-white,
-html.light .text-slate-50,
-html.light .text-slate-100,
-html.light .text-slate-200 {
-  color: #0f172a !important;
+/* Text Overrides for Light Mode - Exclude solid buttons and dark overlays */
+html.light main#app-main-content .text-white,
+html.light main#app-main-content .text-slate-100,
+html.light main#app-main-content .text-slate-200,
+html.light header#app-header .text-white,
+html.light header#app-header .text-slate-100 {
+  color: #0f172a;
 }
 
 html.light .text-slate-300 {
-  color: #1e293b !important;
+  color: #1e293b;
 }
 
 html.light .text-slate-400 {
-  color: #475569 !important;
+  color: #475569;
 }
 
 html.light .text-slate-500 {
-  color: #64748b !important;
+  color: #64748b;
 }
 
-/* Accent text color overrides for Light Mode (rich high-contrast tones) */
+/* Accent text color overrides for Light Mode */
+html.light .text-emerald-300,
 html.light .text-emerald-400 {
-  color: #047857 !important; /* emerald-700 */
+  color: #047857; /* emerald-700 */
 }
 
+html.light .text-rose-300,
 html.light .text-rose-400 {
-  color: #e11d48 !important; /* rose-600 */
+  color: #be123c; /* rose-700 */
 }
 
+html.light .text-amber-200,
+html.light .text-amber-200\/90,
+html.light .text-amber-300,
 html.light .text-amber-400 {
-  color: #b45309 !important; /* amber-700 */
+  color: #78350f !important; /* amber-900 - dark crisp readable text */
 }
 
+html.light .text-indigo-300,
 html.light .text-indigo-400 {
-  color: #4338ca !important; /* indigo-700 */
+  color: #3730a3; /* indigo-800 */
 }
 
+html.light .text-purple-300,
 html.light .text-purple-400 {
-  color: #7e22ce !important; /* purple-700 */
+  color: #6b21a8; /* purple-800 */
 }
 
 html.light .text-sky-400,
 html.light .text-blue-400 {
-  color: #0369a1 !important; /* sky-700 */
-}
-
-/* Hover text states in light mode */
-html.light .hover\:text-white:hover,
-html.light .hover\:text-slate-100:hover,
-html.light .hover\:text-slate-200:hover {
-  color: #0f172a !important;
-}
-
-html.light .hover\:text-slate-300:hover {
-  color: #1e293b !important;
-}
-
-html.light .hover\:bg-slate-700:hover,
-html.light .hover\:bg-slate-800\/50:hover,
-html.light .hover\:bg-slate-800:hover {
-  background-color: #e2e8f0 !important;
+  color: #0369a1; /* sky-700 */
 }
 
 /* Form Controls & Input Text Visibility in Light Mode */
 html.light input,
 html.light select,
 html.light textarea {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: #cbd5e1 !important;
+  background-color: #ffffff;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
 html.light input::placeholder,
 html.light textarea::placeholder {
-  color: #64748b !important;
+  color: #64748b;
 }
 
 html.light input:focus,
 html.light select:focus,
 html.light textarea:focus {
-  border-color: var(--color-primary, #10b981) !important;
-  background-color: #ffffff !important;
+  border-color: var(--color-primary, #10b981);
+  background-color: #ffffff;
 }
 
 html.light select option {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
-/* Solid Colored Action Buttons - Preserve Crisp White Text */
-html.light .bg-emerald-500,
-html.light .bg-emerald-600,
-html.light .bg-rose-500,
-html.light .bg-rose-600,
-html.light .bg-indigo-600,
-html.light .bg-indigo-500,
-html.light .bg-purple-600,
-html.light .bg-purple-500,
-html.light .bg-amber-500,
-html.light button.bg-emerald-500,
-html.light button.bg-emerald-600,
-html.light button.bg-rose-500,
-html.light button.bg-rose-600,
-html.light button.bg-indigo-600,
-html.light button.bg-purple-600,
-html.light button.bg-amber-500 {
+/* Solid Colored Action Buttons - Preserve White Text Always */
+.bg-emerald-500,
+.bg-emerald-600,
+.bg-rose-500,
+.bg-rose-600,
+.bg-indigo-600,
+.bg-indigo-500,
+.bg-purple-600,
+.bg-purple-500,
+button.bg-emerald-500,
+button.bg-emerald-600,
+button.bg-rose-500,
+button.bg-rose-600,
+button.bg-indigo-600,
+button.bg-purple-600 {
   color: #ffffff !important;
 }
 
-html.light .bg-emerald-500 *,
-html.light .bg-emerald-600 *,
-html.light .bg-rose-500 *,
-html.light .bg-rose-600 *,
-html.light .bg-indigo-600 *,
-html.light .bg-purple-600 *,
-html.light .bg-amber-500 * {
-  color: inherit;
+.bg-emerald-500 *,
+.bg-emerald-600 *,
+.bg-rose-500 *,
+.bg-rose-600 *,
+.bg-indigo-600 *,
+.bg-purple-600 * {
+  color: inherit !important;
 }
 
-/* Amber button specific text fix if amber uses dark text */
-html.light .bg-amber-500.text-slate-950,
-html.light button.bg-amber-500.text-slate-950 {
-  color: #020617 !important;
+/* Ensure PIN Lock Screen & Dark Backdrops remain dark with white text */
+#pin-lock-overlay {
+  background-color: rgba(2, 6, 23, 0.94) !important;
+  color: #f8fafc !important;
 }
 
-/* Modal Backdrops in Light Mode */
-html.light #transaction-modal-backdrop,
-html.light #create-month-modal-backdrop,
-html.light .fixed.inset-0.bg-slate-950\/80 {
-  background-color: rgba(15, 23, 42, 0.45) !important;
-  backdrop-filter: blur(8px) !important;
+#pin-lock-overlay .bg-slate-900,
+#pin-lock-overlay .bg-slate-900\/80 {
+  background-color: rgba(15, 23, 42, 0.90) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+}
+
+#pin-lock-overlay h2,
+#pin-lock-overlay h3,
+#pin-lock-overlay .text-white {
+  color: #ffffff !important;
+}
+
+#pin-lock-overlay .text-slate-100,
+#pin-lock-overlay .text-slate-200,
+#pin-lock-overlay .text-slate-300 {
+  color: #e2e8f0 !important;
+}
+
+#pin-lock-overlay .text-slate-400,
+#pin-lock-overlay .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+#pin-lock-overlay .bg-slate-800,
+#pin-lock-overlay .bg-slate-800\/80,
+#pin-lock-overlay .bg-slate-800\/40 {
+  background-color: rgba(30, 41, 59, 0.80) !important;
+  border-color: rgba(51, 65, 85, 0.8) !important;
+  color: #f8fafc !important;
+}
+
+#pin-lock-overlay input {
+  background-color: #020617 !important;
+  color: #ffffff !important;
+  border-color: #334155 !important;
 }

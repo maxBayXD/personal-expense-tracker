@@ -48,7 +48,6 @@ export default function App() {
     enablePin,
     disablePin,
     resetPinWithAnswer,
-    emergencyResetPin,
   } = usePinLock();
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'months' | 'debts' | 'guide' | 'settings'>('dashboard');
@@ -99,7 +98,6 @@ export default function App() {
           securityQuestion={securityQuestion}
           onUnlock={unlockApp}
           onResetWithAnswer={resetPinWithAnswer}
-          onEmergencyReset={emergencyResetPin}
         />
       )}
 
