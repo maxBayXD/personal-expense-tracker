@@ -1,6 +1,6 @@
 {
   "name": "Personal Expense Tracker",
-  "description": "An offline-first personal expense tracker that replicates Excel cash flow logic, auto carry-forward balances, and debt EMI tracking.",
+  "description": "An offline-first personal expense tracker that replaces Excel cash flow spreadsheets with automatic month carry-forward balances and automated debt EMI deductions.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
