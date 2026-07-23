@@ -10,11 +10,12 @@ import {
   Plus,
   WifiOff,
   ChevronDown,
+  BookOpen,
 } from 'lucide-react';
 
 interface HeaderProps {
-  activeTab: 'dashboard' | 'months' | 'debts' | 'settings';
-  setActiveTab: (tab: 'dashboard' | 'months' | 'debts' | 'settings') => void;
+  activeTab: 'dashboard' | 'months' | 'debts' | 'guide' | 'settings';
+  setActiveTab: (tab: 'dashboard' | 'months' | 'debts' | 'guide' | 'settings') => void;
   months: Month[];
   currentMonth: Month | null;
   setCurrentMonthId: (id: string) => void;
@@ -136,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             id="nav-tab-debts"
             onClick={() => setActiveTab('debts')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
               activeTab === 'debts'
                 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
@@ -144,6 +145,19 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <CreditCard className="w-3.5 h-3.5" />
             <span>Debts & EMIs</span>
+          </button>
+
+          <button
+            id="nav-tab-guide"
+            onClick={() => setActiveTab('guide')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap cursor-pointer ${
+              activeTab === 'guide'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+            }`}
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>User Guide</span>
           </button>
 
           <button

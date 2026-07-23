@@ -5,6 +5,7 @@ import { Dashboard } from './components/Dashboard';
 import { MonthsList } from './components/MonthsList';
 import { DebtsScreen } from './components/DebtsScreen';
 import { SettingsScreen } from './components/SettingsScreen';
+import { UserGuide } from './components/UserGuide';
 import { TransactionModal } from './components/TransactionModal';
 import { CreateMonthModal } from './components/CreateMonthModal';
 import { getNextMonthId } from './utils/calculations';
@@ -33,7 +34,7 @@ export default function App() {
     importJSON,
   } = useDatabase();
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'months' | 'debts' | 'settings'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'months' | 'debts' | 'guide' | 'settings'>('dashboard');
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'income' | 'expense' | 'debt'>('expense');
   const [createMonthModalOpen, setCreateMonthModalOpen] = useState(false);
@@ -122,6 +123,15 @@ export default function App() {
             onUpdateDebt={updateDebt}
             onDeleteDebt={deleteDebt}
             onOpenAddModal={() => handleOpenQuickAdd('debt')}
+          />
+        )}
+
+        {activeTab === 'guide' && (
+          <UserGuide
+            onNavigateToDashboard={() => setActiveTab('dashboard')}
+            onNavigateToMonths={() => setActiveTab('months')}
+            onNavigateToDebts={() => setActiveTab('debts')}
+            onCreateFirstMonth={handleOpenCreateMonth}
           />
         )}
 

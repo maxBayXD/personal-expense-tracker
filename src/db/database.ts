@@ -6,147 +6,21 @@ const STORAGE_KEY_TRANSACTIONS = 'expense_tracker_transactions_v1';
 const STORAGE_KEY_DEBTS = 'expense_tracker_debts_v1';
 const STORAGE_KEY_SETTINGS = 'expense_tracker_settings_v1';
 
+const now = new Date();
+const currentMonthNum = now.getMonth() + 1;
+const currentMonthStr = currentMonthNum < 10 ? `0${currentMonthNum}` : `${currentMonthNum}`;
+const defaultMonthId = `${now.getFullYear()}-${currentMonthStr}`;
+
 export const DEFAULT_SETTINGS: AppSettings = {
   currencySymbol: '₹',
   currencyCode: 'INR',
-  currentMonthId: '2026-08',
+  currentMonthId: defaultMonthId,
 };
 
-// Default seed data based on user specification
-const INITIAL_MONTHS: Month[] = [
-  {
-    id: '2026-07',
-    month: 7,
-    year: 2026,
-    openingBalance: 5000,
-    closingBalance: 17000,
-    createdAt: new Date('2026-07-01').toISOString(),
-  },
-  {
-    id: '2026-08',
-    month: 8,
-    year: 2026,
-    openingBalance: 17000, // Carried forward from July closing balance
-    closingBalance: 17000, // Dynamic before transactions
-    createdAt: new Date('2026-08-01').toISOString(),
-  },
-];
-
-const INITIAL_DEBTS: Debt[] = [
-  {
-    id: 'debt-1',
-    name: 'Personal Loan',
-    emi: 1820,
-    remainingMonths: 4,
-    remainingAmount: 7280,
-    active: true,
-    createdAt: new Date('2026-07-01').toISOString(),
-  },
-  {
-    id: 'debt-2',
-    name: 'Bike Loan',
-    emi: 2450,
-    remainingMonths: 10,
-    remainingAmount: 24500,
-    active: true,
-    createdAt: new Date('2026-07-01').toISOString(),
-  },
-];
-
-const INITIAL_TRANSACTIONS: Transaction[] = [
-  // July Income & Expenses
-  {
-    id: 'tx-jul-1',
-    monthId: '2026-07',
-    type: 'income',
-    category: 'Salary',
-    description: 'Monthly Salary Credit',
-    amount: 40000,
-    date: '2026-07-01',
-    isAuto: false,
-  },
-  {
-    id: 'tx-jul-2',
-    monthId: '2026-07',
-    type: 'expense',
-    category: 'House Rent',
-    description: 'Apartment Rent',
-    amount: 15000,
-    date: '2026-07-05',
-    isAuto: false,
-  },
-  {
-    id: 'tx-jul-3',
-    monthId: '2026-07',
-    type: 'expense',
-    category: 'Groceries',
-    description: 'Monthly Supermarket',
-    amount: 8730,
-    date: '2026-07-10',
-    isAuto: false,
-  },
-  {
-    id: 'tx-jul-4',
-    monthId: '2026-07',
-    type: 'expense',
-    category: 'Debt EMI',
-    description: 'Personal Loan EMI',
-    amount: 1820,
-    date: '2026-07-12',
-    isAuto: true,
-  },
-  {
-    id: 'tx-jul-5',
-    monthId: '2026-07',
-    type: 'expense',
-    category: 'Debt EMI',
-    description: 'Bike Loan EMI',
-    amount: 2450,
-    date: '2026-07-12',
-    isAuto: true,
-  },
-  // August Auto EMIs (Generated on month creation)
-  {
-    id: 'tx-aug-1',
-    monthId: '2026-08',
-    type: 'expense',
-    category: 'Debt EMI',
-    description: 'Personal Loan EMI',
-    amount: 1820,
-    date: '2026-08-01',
-    isAuto: true,
-  },
-  {
-    id: 'tx-aug-2',
-    monthId: '2026-08',
-    type: 'expense',
-    category: 'Debt EMI',
-    description: 'Bike Loan EMI',
-    amount: 2450,
-    date: '2026-08-01',
-    isAuto: true,
-  },
-  {
-    id: 'tx-aug-3',
-    monthId: '2026-08',
-    type: 'income',
-    category: 'Salary',
-    description: 'Monthly Salary Credit',
-    amount: 45000,
-    date: '2026-08-01',
-    isAuto: false,
-  },
-  {
-    id: 'tx-aug-4',
-    monthId: '2026-08',
-    type: 'expense',
-    category: 'House Rent',
-    description: 'Apartment Rent',
-    amount: 15000,
-    date: '2026-08-03',
-    isAuto: false,
-  },
-];
+// Start blank with no pre-seeded records
+const INITIAL_MONTHS: Month[] = [];
+const INITIAL_DEBTS: Debt[] = [];
+const INITIAL_TRANSACTIONS: Transaction[] = [];
 
 export class LocalDatabase {
   public static loadMonths(): Month[] {
