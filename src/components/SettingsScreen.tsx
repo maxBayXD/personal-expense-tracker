@@ -42,6 +42,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
+  const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,12 +181,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           {/* Reset All Data */}
           <button
             id="settings-reset-db-btn"
-            onClick={() => {
-              if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
-                onClearDatabase();
-              }
-            }}
-            className="px-3.5 py-2 bg-rose-950/30 hover:bg-rose-950/60 text-rose-300 text-xs font-medium rounded-xl border border-rose-800/50 flex items-center gap-1.5 transition-colors"
+            onClick={() => setShowClearConfirmModal(true)}
+            className="px-3.5 py-2 bg-rose-950/30 hover:bg-rose-950/60 text-rose-300 text-xs font-medium rounded-xl border border-rose-800/50 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <Trash2 className="w-3.5 h-3.5" />
             <span>Clear Database</span>
@@ -214,6 +211,49 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           </p>
         </div>
       </div>
+
+      {/* Clear Database Confirmation Modal */}
+      {showClearConfirmModal && (
+        <div id="clear-db-confirm-modal" className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs">
+          <div className="bg-slate-900 border border-rose-900/60 rounded-2xl w-full max-w-md p-6 shadow-2xl text-slate-100 space-y-4 animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center gap-3 text-rose-400">
+              <div className="w-10 h-10 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0">
+                <Trash2 className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Clear Entire Database?</h3>
+                <p className="text-xs text-slate-400">This action is permanent and cannot be undone.</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-300 bg-slate-950/80 p-3 rounded-xl border border-slate-800 leading-relaxed">
+              Are you sure you want to delete all months, transactions, debts, and custom settings? All stored local browser data will be completely wiped.
+            </p>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearConfirmModal(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="clear-db-confirm-btn"
+                onClick={() => {
+                  onClearDatabase();
+                  setShowClearConfirmModal(false);
+                }}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-rose-900/30 flex items-center gap-1.5"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Yes, Clear Everything</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
