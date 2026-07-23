@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDatabase } from './hooks/useDatabase';
 import { useTheme } from './hooks/useTheme';
+import { usePinLock } from './hooks/usePinLock';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
 import { MonthsList } from './components/MonthsList';
@@ -9,6 +10,7 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { UserGuide } from './components/UserGuide';
 import { TransactionModal } from './components/TransactionModal';
 import { CreateMonthModal } from './components/CreateMonthModal';
+import { PinLockScreen } from './components/PinLockScreen';
 import { getNextMonthId } from './utils/calculations';
 
 export default function App() {
@@ -36,6 +38,18 @@ export default function App() {
   } = useDatabase();
 
   const { theme, toggleTheme, colorTheme, setColorTheme, isGlass, toggleGlass } = useTheme();
+
+  const {
+    pinEnabled,
+    securityQuestion,
+    isLocked,
+    unlockApp,
+    lockApp,
+    enablePin,
+    disablePin,
+    resetPinWithAnswer,
+    emergencyResetPin,
+  } = usePinLock();
 
   const [activeTab, setActiveTab] = useState<'dashboard' | 'months' | 'debts' | 'guide' | 'settings'>('dashboard');
   const [modalOpen, setModalOpen] = useState(false);
@@ -79,6 +93,16 @@ export default function App() {
 
   return (
     <div id="app-root" className="min-h-screen bg-slate-950 text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-slate-950">
+      {/* PIN Lock Screen Overlay when PIN is active and locked */}
+      {isLocked && (
+        <PinLockScreen
+          securityQuestion={securityQuestion}
+          onUnlock={unlockApp}
+          onResetWithAnswer={resetPinWithAnswer}
+          onEmergencyReset={emergencyResetPin}
+        />
+      )}
+
       {/* App Header */}
       <Header
         activeTab={activeTab}
@@ -143,6 +167,9 @@ export default function App() {
         {activeTab === 'settings' && (
           <SettingsScreen
             settings={settings}
+            months={months}
+            transactions={transactions}
+            debts={debts}
             onUpdateSettings={updateSettings}
             onSeedSampleData={seedSampleData}
             onClearDatabase={clearDatabase}
@@ -154,6 +181,13 @@ export default function App() {
             setColorTheme={setColorTheme}
             isGlass={isGlass}
             toggleGlass={toggleGlass}
+            pinLock={{
+              pinEnabled,
+              securityQuestion,
+              onEnablePin: enablePin,
+              onDisablePin: disablePin,
+              onLockApp: lockApp,
+            }}
           />
         )}
       </main>

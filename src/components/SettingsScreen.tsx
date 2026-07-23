@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { AppSettings } from '../types';
+import { AppSettings, Debt, Month, Transaction } from '../types';
 import { ColorTheme } from '../hooks/useTheme';
+import { exportDebtsToCSV, exportTransactionsToCSV } from '../utils/csvExport';
 import {
   Settings,
   Download,
@@ -15,11 +16,21 @@ import {
   Moon,
   Sparkles,
   Palette,
-  Layers,
+  Lock,
+  Unlock,
+  KeyRound,
+  AlertTriangle,
+  FileText,
+  X,
+  ArrowRight,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface SettingsScreenProps {
   settings: AppSettings;
+  months: Month[];
+  transactions: Transaction[];
+  debts: Debt[];
   onUpdateSettings: (newSettings: Partial<AppSettings>) => void;
   onSeedSampleData: () => void;
   onClearDatabase: () => void;
@@ -31,6 +42,13 @@ interface SettingsScreenProps {
   setColorTheme?: (color: ColorTheme) => void;
   isGlass?: boolean;
   toggleGlass?: () => void;
+  pinLock?: {
+    pinEnabled: boolean;
+    securityQuestion: string;
+    onEnablePin: (pin: string, question: string, answer: string) => void;
+    onDisablePin: () => void;
+    onLockApp: () => void;
+  };
 }
 
 const CURRENCY_OPTIONS = [
@@ -44,8 +62,19 @@ const CURRENCY_OPTIONS = [
   { symbol: 'AED', code: 'AED', label: 'UAE Dirham (AED)' },
 ];
 
+const RECOVERY_QUESTIONS = [
+  'What was your childhood nickname?',
+  'In what city were you born?',
+  'What was the name of your first pet?',
+  'What is your favorite book or movie?',
+  'What was the make of your first car?',
+];
+
 export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   settings,
+  months,
+  transactions,
+  debts,
   onUpdateSettings,
   onSeedSampleData,
   onClearDatabase,
@@ -57,10 +86,20 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   setColorTheme,
   isGlass = true,
   toggleGlass,
+  pinLock,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importSuccess, setImportSuccess] = useState<boolean | null>(null);
   const [showClearConfirmModal, setShowClearConfirmModal] = useState(false);
+
+  // PIN Setup Modal state
+  const [showPinSetupModal, setShowPinSetupModal] = useState(false);
+  const [setupPin, setSetupPin] = useState('');
+  const [setupConfirmPin, setSetupConfirmPin] = useState('');
+  const [setupQuestion, setSetupQuestion] = useState(RECOVERY_QUESTIONS[0]);
+  const [customQuestion, setCustomQuestion] = useState('');
+  const [setupAnswer, setSetupAnswer] = useState('');
+  const [setupError, setSetupError] = useState('');
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -72,24 +111,55 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       if (content) {
         const ok = onImportJSON(content);
         setImportSuccess(ok);
-        setTimeout(() => setImportSuccess(null), 3000);
       }
     };
     reader.readAsText(file);
+    if (e.target) e.target.value = '';
+  };
+
+  const handleSavePinSetup = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSetupError('');
+
+    if (setupPin.length !== 4 || !/^\d{4}$/.test(setupPin)) {
+      setSetupError('PIN code must be exactly 4 numeric digits.');
+      return;
+    }
+    if (setupPin !== setupConfirmPin) {
+      setSetupError('PIN confirmation does not match. Please try again.');
+      return;
+    }
+    const finalQuestion = setupQuestion === 'custom' ? customQuestion : setupQuestion;
+    if (!finalQuestion.trim()) {
+      setSetupError('Please select or provide a security recovery question.');
+      return;
+    }
+    if (!setupAnswer.trim()) {
+      setSetupError('Please provide a security recovery answer.');
+      return;
+    }
+
+    if (pinLock) {
+      pinLock.onEnablePin(setupPin, finalQuestion, setupAnswer);
+      setShowPinSetupModal(false);
+      setSetupPin('');
+      setSetupConfirmPin('');
+      setSetupAnswer('');
+    }
   };
 
   return (
-    <div id="settings-screen-container" className="space-y-6 pb-12">
-      {/* Settings Header */}
-      <div id="settings-header" className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-xl flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold shrink-0">
-          <Settings className="w-5 h-5" />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-white">App Settings & Offline Backup</h2>
-          <p className="text-xs text-slate-400">
-            All your cash flow records stay 100% on your device with zero cloud dependency.
-          </p>
+    <div id="settings-screen-container" className="space-y-6 max-w-4xl mx-auto pb-12">
+      {/* Settings Screen Header */}
+      <div className="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <Settings className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-slate-100">App Settings & Preferences</h2>
+            <p className="text-xs text-slate-400">Configure currency, CSV exports, themes, and app security</p>
+          </div>
         </div>
       </div>
 
@@ -187,7 +257,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                     <Sparkles className={`w-4 h-4 ${isGlass ? 'text-indigo-400' : 'text-slate-500'}`} />
                     <div>
                       <span className="text-xs font-bold block text-slate-200">iOS Liquid Glass Effect</span>
-                      <span className="text-[10px] text-slate-400">Translucent SF-style cards, background blur & glossy glow</span>
+                      <span className="text-[10px] text-slate-400">Translucent SF-style cards & glossy glow</span>
                     </div>
                   </div>
                   <div className={`w-9 h-5 rounded-full p-0.5 transition-colors relative ${isGlass ? 'bg-indigo-500' : 'bg-slate-700'}`}>
@@ -236,26 +306,128 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       </div>
 
-      {/* 2. Data Management & Backup */}
+      {/* 3. App Security & PIN Lock Section */}
+      {pinLock && (
+        <div id="settings-pin-security-card" className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <span>App Security & PIN Lock</span>
+            </h3>
+
+            <div
+              className={`px-3 py-1 rounded-full text-[11px] font-bold flex items-center gap-1.5 border ${
+                pinLock.pinEnabled
+                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                  : 'bg-slate-800 border-slate-700 text-slate-400'
+              }`}
+            >
+              {pinLock.pinEnabled ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+              <span>{pinLock.pinEnabled ? 'PIN Lock Active' : 'PIN Lock Off'}</span>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-300 leading-relaxed">
+            Protect your financial privacy with a 4-digit PIN lock when launching the application.
+          </p>
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            {pinLock.pinEnabled ? (
+              <>
+                <button
+                  type="button"
+                  onClick={pinLock.onLockApp}
+                  className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-md cursor-pointer"
+                >
+                  <Lock className="w-4 h-4" />
+                  <span>Lock Session Now</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowPinSetupModal(true)}
+                  className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-medium transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <KeyRound className="w-4 h-4 text-amber-400" />
+                  <span>Change PIN / Recovery</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={pinLock.onDisablePin}
+                  className="px-4 py-2.5 bg-rose-950/30 hover:bg-rose-900/50 border border-rose-800/50 text-rose-300 rounded-xl text-xs font-medium transition-all flex items-center gap-2 cursor-pointer"
+                >
+                  <Unlock className="w-4 h-4 text-rose-400" />
+                  <span>Disable PIN Protection</span>
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowPinSetupModal(true)}
+                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
+              >
+                <Lock className="w-4 h-4" />
+                <span>Enable 4-Digit PIN Lock</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* 4. Data Management & CSV / JSON Exports */}
       <div id="settings-data-card" className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-4">
         <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Offline Backup & Restore</span>
+          <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
+          <span>Offline CSV Export & Data Backups</span>
         </h3>
 
+        {/* CSV Export Options */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <button
+            id="settings-export-transactions-csv-btn"
+            onClick={() => exportTransactionsToCSV(transactions, months, settings.currencySymbol)}
+            className="p-4 bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl text-left transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs mb-1">
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>Export Transactions to CSV</span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Download all income and expense transactions formatted for Microsoft Excel, Google Sheets, or Apple Numbers.
+            </p>
+          </button>
+
+          <button
+            id="settings-export-debts-csv-btn"
+            onClick={() => exportDebtsToCSV(debts, settings.currencySymbol)}
+            className="p-4 bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl text-left transition-all group cursor-pointer"
+          >
+            <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs mb-1">
+              <FileText className="w-4 h-4" />
+              <span>Export Debts & EMI to CSV</span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Download active loan EMI schedules and debt balances as a clean CSV spreadsheet.
+            </p>
+          </button>
+        </div>
+
+        {/* JSON Backup & Restore Options */}
+        <div className="pt-2 border-t border-slate-800/80 grid grid-cols-1 sm:grid-cols-2 gap-3">
           {/* Export JSON */}
           <button
             id="settings-export-json-btn"
             onClick={onExportJSON}
-            className="p-4 bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl text-left transition-all group"
+            className="p-4 bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl text-left transition-all group cursor-pointer"
           >
-            <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs mb-1">
+            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
               <Download className="w-4 h-4" />
-              <span>Export Full Backup (JSON)</span>
+              <span>Export Full Database (JSON)</span>
             </div>
             <p className="text-[11px] text-slate-400">
-              Download all months, transactions, and debts as a single offline backup file.
+              Complete raw JSON database backup containing months, transactions, and app settings.
             </p>
           </button>
 
@@ -263,14 +435,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <button
             id="settings-import-json-btn"
             onClick={() => fileInputRef.current?.click()}
-            className="p-4 bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl text-left transition-all group"
+            className="p-4 bg-slate-950/80 hover:bg-slate-950 border border-slate-800 hover:border-slate-700 rounded-xl text-left transition-all group cursor-pointer"
           >
-            <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
+            <div className="flex items-center gap-2 text-purple-400 font-semibold text-xs mb-1">
               <Upload className="w-4 h-4" />
-              <span>Import / Restore Backup</span>
+              <span>Import / Restore JSON Backup</span>
             </div>
             <p className="text-[11px] text-slate-400">
-              Load a previously exported Expense Tracker JSON backup file.
+              Restore data from a previously saved JSON backup file.
             </p>
             <input
               ref={fileInputRef}
@@ -304,7 +476,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <button
             id="settings-seed-sample-btn"
             onClick={onSeedSampleData}
-            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 flex items-center gap-1.5 transition-colors"
+            className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5 text-emerald-400" />
             <span>Load Sample Excel Demo Data</span>
@@ -322,27 +494,132 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
         </div>
       </div>
 
-      {/* 3. Excel Logic Reference */}
-      <div id="settings-excel-guide" className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg space-y-3">
-        <h3 className="text-sm font-semibold text-slate-100 flex items-center gap-2">
-          <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
-          <span>Excel Cash Flow Workflow Architecture</span>
-        </h3>
+      {/* PIN Setup Modal */}
+      {showPinSetupModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-fade-in">
+          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5 text-left relative">
+            <button
+              onClick={() => setShowPinSetupModal(false)}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white rounded-full bg-slate-800/50 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
 
-        <div className="bg-slate-950/80 p-4 rounded-xl border border-slate-800/80 text-xs text-slate-300 space-y-2 font-mono">
-          <p className="text-emerald-400 font-bold">1. Monthly Equation:</p>
-          <p className="pl-3">Closing Balance = Opening Balance + Total Income - Total Expenses</p>
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400">
+                <Lock className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Configure 4-Digit PIN Security</h3>
+                <p className="text-xs text-slate-400">Set a PIN code and security question for app access</p>
+              </div>
+            </div>
 
-          <p className="text-emerald-400 font-bold pt-1">2. Automatic Balance Carry Forward:</p>
-          <p className="pl-3">Next Month Opening Balance = Previous Month Closing Balance</p>
+            {/* Explicit Security Warning Box */}
+            <div className="p-3.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-300 space-y-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-amber-400">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Important PIN Security Warning</span>
+              </div>
+              <p className="text-[11px] text-amber-200/90 leading-relaxed">
+                Please remember your 4-digit PIN code and set a recovery question below! If you lose your PIN, you will need your Security Answer to recover access, or perform an Emergency PIN Reset. Export CSV or JSON data backups periodically to keep your financial records secure.
+              </p>
+            </div>
 
-          <p className="text-emerald-400 font-bold pt-1">3. Automated Debt EMI Engine:</p>
-          <p className="pl-3">
-            Every active debt automatically generates an Expense transaction on month creation.
-            Remaining Amount = Remaining Amount - EMI, Remaining Months = Remaining Months - 1.
-          </p>
+            <form onSubmit={handleSavePinSetup} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300 block">4-Digit PIN Code</label>
+                  <input
+                    type="password"
+                    maxLength={4}
+                    required
+                    placeholder="e.g. 1234"
+                    value={setupPin}
+                    onChange={(e) => setSetupPin(e.target.value.replace(/\D/g, ''))}
+                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 tracking-widest text-center"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-300 block">Confirm PIN Code</label>
+                  <input
+                    type="password"
+                    maxLength={4}
+                    required
+                    placeholder="e.g. 1234"
+                    value={setupConfirmPin}
+                    onChange={(e) => setSetupConfirmPin(e.target.value.replace(/\D/g, ''))}
+                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 tracking-widest text-center"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-300 block">Security Recovery Question</label>
+                <select
+                  value={setupQuestion}
+                  onChange={(e) => setSetupQuestion(e.target.value)}
+                  className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-emerald-500 cursor-pointer"
+                >
+                  {RECOVERY_QUESTIONS.map((q) => (
+                    <option key={q} value={q}>
+                      {q}
+                    </option>
+                  ))}
+                  <option value="custom">-- Custom Question --</option>
+                </select>
+
+                {setupQuestion === 'custom' && (
+                  <input
+                    type="text"
+                    required
+                    placeholder="Type your custom security question..."
+                    value={customQuestion}
+                    onChange={(e) => setCustomQuestion(e.target.value)}
+                    className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 mt-2"
+                  />
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-slate-300 block">Security Recovery Answer</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Your secret answer..."
+                  value={setupAnswer}
+                  onChange={(e) => setSetupAnswer(e.target.value)}
+                  className="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                />
+              </div>
+
+              {setupError && (
+                <p className="text-xs font-medium text-rose-400 bg-rose-500/10 border border-rose-500/20 p-2.5 rounded-xl">
+                  {setupError}
+                </p>
+              )}
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowPinSetupModal(false)}
+                  className="w-1/2 p-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs rounded-xl cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="w-1/2 p-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 shadow-lg shadow-emerald-500/20"
+                >
+                  <span>Save PIN Protection</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Clear Database Confirmation Modal */}
       {showClearConfirmModal && (
@@ -366,7 +643,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
               <button
                 type="button"
                 onClick={() => setShowClearConfirmModal(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
               >
                 Cancel
               </button>
@@ -377,7 +654,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   onClearDatabase();
                   setShowClearConfirmModal(false);
                 }}
-                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-rose-900/30 flex items-center gap-1.5"
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-colors shadow-lg shadow-rose-900/30 flex items-center gap-1.5 cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Yes, Clear Everything</span>
